@@ -1,0 +1,241 @@
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+#NFT_collections {
+    text-align: left;
+    padding: 40px 20px;
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+#NFT_collections h2 {
+    margin-bottom: 30px;
+    font-size: 3rem;
+    text-align: center;
+    width: 100%;
+    color: var(--text-main);
+}
+
+.nft-filter-wrapper {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.nft-filter-bar {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    background: var(--surface-panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+}
+
+.nft-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 130px;
+    min-width: 110px;
+}
+
+.nft-filter-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.nft-filter-group select,
+.nft-filter-group input[type="number"] {
+    background: var(--surface-muted);
+    color: var(--text-main);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    outline: none;
+    width: 100%;
+}
+
+.nft-filter-group select:focus,
+.nft-filter-group input[type="number"]:focus {
+    border-color: var(--button-bg);
+}
+
+.nft-filter-check {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    min-width: unset;
+    padding-bottom: 4px;
+}
+
+.nft-filter-check + .filter-apply-btn {
+    margin-left: auto;
+}
+
+.nft-filter-check label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.filter-apply-btn {
+    background: var(--link-hover);
+    color: var(--text-inverse);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 18px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: auto;
+    align-self: flex-end;
+}
+
+.filter-apply-btn:hover {
+    background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
+}
+
+.filter-reset-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-top: auto;
+    align-self: flex-end;
+}
+
+.filter-reset-btn:hover {
+    background: var(--surface-muted);
+    color: var(--text-main);
+}
+
+.products-collection-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.collection-card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    text-align: left;
+    padding: 22px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.collection-card h3 {
+    text-decoration: underline;
+    margin: 0 0 10px;
+}
+
+.collection-content {
+    flex: 1;
+    text-align: center;
+}
+
+.collection-content p {
+    margin: 10px 0;
+}
+
+.collection-stock {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: var(--subtext-color);
+}
+
+.collection-image-wrapper {
+    display: flex;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.collection-image-frame {
+    width: 185px;
+    aspect-ratio: 1 / 1.4;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface-input) 70%, #000 30%);
+    box-shadow: var(--shadow-elevated);
+}
+
+.collection-image-frame::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--collection-preview-bg-image);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    filter: blur(18px) saturate(0.95);
+    transform: scale(1.12);
+    opacity: 0.9;
+    z-index: 0;
+}
+
+.collection-image-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(10, 14, 24, 0.12) 0%,
+        rgba(10, 14, 24, 0.18) 100%
+    );
+    z-index: 1;
+}
+
+.collection-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    position: relative;
+    z-index: 2;
+}
+
+.collection-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-elevated);
+}
+
+@media (max-width: 720px) {
+    .collection-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .collection-image-wrapper {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .collection-image-frame {
+        width: 150px;
+    }
+}

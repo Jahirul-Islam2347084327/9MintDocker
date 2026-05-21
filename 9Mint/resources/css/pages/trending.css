@@ -1,0 +1,81 @@
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+#trending-section {
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+#trending-section h2 {
+    margin-bottom: 8px;
+    font-size: 3rem;
+    color: var(--text-main);
+}
+
+.trending-subtitle {
+    font-size: 1.1rem;
+    color: var(--subtext-color);
+    margin-bottom: 30px;
+}
+
+.trending-empty {
+    color: var(--subtext-color);
+    font-size: 1.1rem;
+    margin-top: 40px;
+}
+
+.trending-rank-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 3;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.8);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--border-soft);
+}
+
+.trending-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+.trending-sales-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: color-mix(in srgb, var(--link-hover) 20%, transparent);
+    color: var(--link-hover);
+    white-space: nowrap;
+}
+
+.trending-collection-name {
+    font-size: 0.8rem;
+    color: var(--subtext-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 600px) {
+    #trending-section h2 {
+        font-size: 2rem;
+    }
+}

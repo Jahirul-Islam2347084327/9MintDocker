@@ -1,0 +1,205 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+.NFT-Card,
+.Duck-NFT,
+.Cat-NFT,
+.Donkey-NFT,
+.Giraffe-NFT,
+.Lobster-NFT,
+.Rooster-NFT,
+.Squirrel-NFT {
+    display: flex;
+    align-items: flex-start;
+    padding: 25px;
+    border-radius: 12px;
+    margin: 30px auto;
+    width: 90%;
+    max-width: 800px;
+    gap: 20px;
+    background: var(--surface-panel);
+    color: var(--text-main);
+    border: 1px solid var(--border-soft);
+}
+
+.nft-image {
+    height: auto;
+    width: 200px;
+    border: 2px solid var(--border-soft);
+    border-radius: 12px;
+}
+
+.nft-info {
+    flex: 1;
+    text-align: left;
+}
+
+.nft-out-of-stock,
+.nft-out-of-stock-message {
+    color: var(--danger);
+    font-weight: bold;
+}
+
+.small-size,
+.medium-size,
+.large-size,
+.size-option button {
+    color: var(--text-main);
+    background: var(--surface-muted);
+    padding: 8px 16px;
+    border-radius: 5px;
+    margin-right: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.small-size:hover,
+.medium-size:hover,
+.large-size:hover,
+.size-option button:hover {
+    background: var(--surface-chrome);
+}
+
+.Add-to-basket {
+    color: var(--text-inverse);
+    border: none;
+    margin-top: 20px;
+    padding: 12px 20px;
+    background: var(--button-bg);
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.Add-to-basket:hover {
+    background: var(--button-hover-bg);
+}
+
+.collection-title {
+    text-align: center;
+    color: var(--text-main);
+    margin-top: 20px;
+}
+
+/* ── NFT Filter Wrapper ── */
+.nft-filter-wrapper {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+/* ── NFT Filter Bar ── */
+.nft-filter-bar {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    background: var(--surface-panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+}
+
+.nft-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 130px;
+    min-width: 110px;
+}
+
+.nft-filter-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.nft-filter-group select,
+.nft-filter-group input[type="number"],
+.nft-filter-group input[type="text"] {
+    background: var(--surface-muted);
+    color: var(--text-main);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    outline: none;
+    width: 100%;
+}
+
+.nft-filter-group select:focus,
+.nft-filter-group input[type="number"]:focus,
+.nft-filter-group input[type="text"]:focus {
+    border-color: var(--button-bg);
+}
+
+.nft-filter-break {
+    flex-basis: 100%;
+    height: 0;
+}
+
+.nft-filter-check {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    min-width: unset;
+    padding-bottom: 4px;
+}
+
+.nft-filter-check + .filter-apply-btn {
+    margin-left: auto;
+}
+
+.nft-filter-check label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.filter-apply-btn {
+    background: var(--link-hover);
+    color: var(--text-inverse);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 18px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: auto;
+    align-self: flex-end;
+}
+
+.filter-apply-btn:hover {
+    background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
+}
+
+.filter-reset-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-top: auto;
+    align-self: flex-end;
+}
+
+.filter-reset-btn:hover {
+    background: var(--surface-muted);
+    color: var(--text-main);
+}

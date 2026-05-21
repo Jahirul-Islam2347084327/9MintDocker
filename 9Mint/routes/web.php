@@ -1,0 +1,352 @@
+<?php
+
+use App\Http\Controllers\AboutUsController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\FavouriteController;
+use App\Http\Controllers\Api\V1\ReviewController as WebsiteReviewController;
+use App\Http\Controllers\CollectionPageController;
+use App\Http\Controllers\ImageController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\Web\PasswordResetController;
+
+// FRONTEND NFT CONTROLLERS
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\FriendshipController;
+use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\TrendingController;
+use App\Http\Controllers\UserProfileController;
+use App\Models\User;
+use App\Http\Controllers\Web\CartController as WebCartController;
+use App\Http\Controllers\Web\CheckoutController as WebCheckoutController;
+use App\Http\Controllers\Web\CollectionController as WebCollection;
+use App\Http\Controllers\Web\CreatorCollectionController;
+use App\Http\Controllers\Web\AdminViewModeController;
+use App\Http\Controllers\Web\FavouritePageController;
+use App\Http\Controllers\NftReviewController;
+use App\Http\Controllers\Auth\GoogleController;
+
+
+// MODELS
+use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\InventoryController;
+use App\Http\Controllers\Web\NftController as WebNft;
+use App\Http\Controllers\Web\NotificationController;
+use App\Http\Controllers\Web\OrderActionController;
+use App\Http\Controllers\Web\ProfileFeedbackController;
+use App\Models\Conversation;
+use App\Models\Friendship;
+use App\Models\Order;
+use App\Models\SellerProfileFeedback;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
+
+
+// ------------------------------
+// AUTH (GUEST)
+// ------------------------------
+/*
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/login', [AuthController::class, 'loginWeb']);
+    Route::post('/register', [AuthController::class, 'registerWeb']);
+});
+*/
+Route::middleware('guest')->group(function () {
+    // Authentication
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'loginWeb'])->middleware('throttle:6,1');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'registerWeb']); 
+
+    // Password Reset
+    Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'store'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.store');
+});
+
+// ------------------------------
+// IMAGE SERVING (Glide)
+// ------------------------------
+Route::get('/img/{path}', [ImageController::class, 'show'])->where('path', '.*')->name('img');
+
+// ------------------------------
+// STATIC PAGES
+// ------------------------------
+Route::get('/', [HomeController::class, 'index'])->name('root');
+Route::get('/cart', [WebCartController::class, 'index'])->middleware(['auth', 'not_banned'])->name('cart.index');
+Route::get('/checkout', [WebCheckoutController::class, 'index'])->middleware(['auth', 'not_banned'])->name('checkout.index');
+Route::get('/pricing', fn() => view('pricing'));
+Route::livewire('/contactUs', 'pages::contact-us');
+Route::get('/contactUs/terms', fn() => view('terms-and-conditions'));
+Route::get('/contactUs/faqs', fn() => view('faqs'));
+Route::get('/users', [SearchController::class, 'usersPage'])->middleware('auth')->name('users.index');
+Route::get('/search/nfts', [SearchController::class, 'nftsPage'])->name('search.nfts');
+Route::get('/search/collections', [SearchController::class, 'collectionsPage'])->name('search.collections');
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+
+// ------------------------------
+// MAIN PAGES
+// ------------------------------
+Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
+Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
+Route::get('/trending', [TrendingController::class, 'index'])->name('trending.index');
+Route::get('/aboutUs', [AboutUsController::class, 'index'])->name('about');
+Route::get('/nft/{slug}', [WebNft::class, 'show'])->name('nfts.show');
+
+Route::get('/my-profile', function () {
+    return redirect()->route('profile.settings');
+})->name('profile.legacy');
+
+
+// ------------------------------
+// FRONTEND TEAM OLD URL SUPPORT
+// ------------------------------
+
+// Old Glossy URL used in frontend
+Route::get('/products/Glossy-collection', function () {
+    return redirect()->route('collections.show', ['slug' => 'glossy-collection']);
+});
+
+// Old Superhero URL used in frontend
+Route::get('/products/SuperheroCollection', function () {
+    return redirect()->route('collections.show', ['slug' => 'superhero-collection']);
+});
+
+
+// ------------------------------
+// NEW DYNAMIC COLLECTION ROUTE
+// ------------------------------
+// This handles: /products/{slug}
+Route::get('/products/{slug}', [CollectionPageController::class, 'show'])
+    ->where('slug', '.*')
+    ->name('collections.show');
+
+
+// ------------------------------
+// AUTHENTICATED ROUTES
+// ------------------------------
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/admin/view-mode', [AdminViewModeController::class, 'update'])->name('admin.view-mode.update');
+    Route::get('/profile/settings', [AuthController::class, 'profile'])->name('profile.settings');
+    Route::get('/my-favourites', [FavouritePageController::class, 'index'])->name('favourites.index');
+    Route::post('/nfts/{nft}/toggle-like', [FavouriteController::class, 'toggle'])->middleware('not_banned')->name('nfts.toggle');
+    Route::post('/chat/start/{receiverId}', [ConversationController::class, 'startConversation'])->middleware(['auth', 'not_banned'])->name('chat.start');
+    Route::get('/chat/user', [ConversationController::class, 'inbox'])->middleware('auth')->name('chat.user.inbox');
+    Route::patch('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+    Route::patch('/profile/password', [AuthController::class, 'updatePassword'])->name('password.update');
+    Route::patch('/profile/email-preferences', [AuthController::class, 'updateEmailPreferences'])->name('profile.email-preferences.update');
+    Route::get('/chat/enter/{receiverId}', [ConversationController::class, 'enterConversation'])->middleware('auth')->name('chat.enter');
+    Route::delete('/website-reviews/{reviewId}', [WebsiteReviewController::class, 'destroy'])->name('website.reviews.destroy');
+    Route::get('/setup-username', fn() => view('auth.setup-username'))->name('username.setup');
+    Route::post('/setup-username', [GoogleController::class, 'updateUsername'])->name('username.update');
+    Route::get('/orders', function (Request $r) {
+        $user = $r->user();
+
+        $orders = Order::with(['items.listing.token.nft'])
+            ->where('user_id', $user->id)
+            ->orderByDesc('placed_at')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $sales = \App\Models\SalesHistory::with(['listing.token.nft', 'order'])
+            ->whereHas('listing', function ($q) use ($user) {
+                $q->where('seller_user_id', $user->id);
+            })
+            ->orderByDesc('sold_at')
+            ->get();
+
+        return view('orders.index', compact('orders', 'sales'));
+    })->name('orders.index');
+
+    Route::post('/cart', [WebCartController::class, 'store'])->middleware('not_banned')->name('cart.store');
+    Route::delete('/cart/{id}', [WebCartController::class, 'destroy'])->middleware('not_banned')->name('cart.destroy');
+    Route::post('/orders', [WebCheckoutController::class, 'store'])->middleware('not_banned')->name('orders.store');
+    Route::get('/orders/{order}/refund-form', [OrderActionController::class, 'showRefundForm'])->middleware('not_banned')->name('orders.refund.form');
+    Route::post('/orders/{order}/refund-request', [OrderActionController::class, 'requestRefund'])->middleware('not_banned')->name('orders.refund-request');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+    Route::get('/inventory', [InventoryController::class, 'index'])->middleware('not_banned')->name('inventory.index');
+    Route::get('/inventory/tokens/{token}/download', [InventoryController::class, 'downloadOwnedTokenImage'])->middleware('not_banned')->name('inventory.token.download');
+    Route::get('/listings', [InventoryController::class, 'listings'])->middleware('not_banned')->name('listings.index');
+    Route::post('/inventory/listings', [InventoryController::class, 'store'])->middleware('not_banned')->name('inventory.listing.store');
+    Route::delete('/inventory/listings/{listing}', [InventoryController::class, 'destroy'])->middleware('not_banned')->name('inventory.listing.destroy');
+    Route::post('/conversations/start-user/{user}', [ConversationController::class, 'startWithUser'])->middleware('not_banned')->name('conversations.start-user');
+    Route::post('/friends/{user}/request', [FriendshipController::class, 'sendRequest'])->middleware('not_banned')->name('friends.request');
+    Route::delete('/friends/{user}/request', [FriendshipController::class, 'cancelRequest'])->middleware('not_banned')->name('friends.request.cancel');
+    Route::post('/friends/{user}/accept', [FriendshipController::class, 'acceptRequest'])->middleware('not_banned')->name('friends.accept');
+    Route::delete('/friends/{user}/decline', [FriendshipController::class, 'declineRequest'])->middleware('not_banned')->name('friends.decline');
+    Route::delete('/friends/{user}', [FriendshipController::class, 'unfriend'])->middleware('not_banned')->name('friends.unfriend');
+    Route::get('/creator/collections/create', [CreatorCollectionController::class, 'create'])->middleware('not_banned')->name('creator.collections.create');
+    Route::post('/creator/collections', [CreatorCollectionController::class, 'store'])->middleware('not_banned')->name('creator.collections.store');
+
+    // view and update details
+    //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
+    // Handle the form submission to update the profile
+    //Route::patch('/profile', [UserProfileController::class, 'updateSelf'])->name('profile.update');
+
+    // change Password
+    //Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
+});
+
+Route::get('/inventory/{username}', [InventoryController::class, 'showByUsername'])
+    ->name('inventory.show');
+
+Route::get('/profile', function () {
+    abort(404);
+});
+
+Route::get('/profile/{username}', function (string $username) {
+    $profileUser = User::where('name', $username)->firstOrFail();
+    $isOwner = auth()->check() && auth()->id() === $profileUser->id;
+    $friendshipState = 'none';
+    $existingConversationId = null;
+    $viewer = auth()->user();
+    $profileCommentsVisibility = $profileUser->profileCommentsVisibility();
+    $sellerRatingAverage = null;
+    $sellerRatingCount = 0;
+    $visibleSellerFeedback = collect();
+    $canSubmitSellerFeedback = auth()->check();
+    $canSubmitProfileComment = $profileUser->canViewerPostProfileComment($viewer);
+    $canViewerSeeOwnedNfts = $profileUser->canViewerSeeOwnedNfts($viewer);
+
+    if (Schema::hasTable('seller_profile_feedback')) {
+        $sellerRatingAverage = SellerProfileFeedback::query()
+            ->where('seller_user_id', $profileUser->id)
+            ->whereNotNull('rating')
+            ->avg('rating');
+
+        $sellerRatingCount = SellerProfileFeedback::query()
+            ->where('seller_user_id', $profileUser->id)
+            ->whereNotNull('rating')
+            ->count();
+
+        $visibleSellerFeedback = SellerProfileFeedback::query()
+            ->with('author')
+            ->where('seller_user_id', $profileUser->id)
+            ->visibleComments()
+            ->latest()
+            ->get();
+    }
+
+    if (auth()->check() && ! $isOwner) {
+        $viewerId = (int) auth()->id();
+        $profileUserId = (int) $profileUser->id;
+
+        $friendshipState = Friendship::stateForViewer($viewerId, $profileUserId);
+
+        if ($friendshipState === 'friends') {
+            $conversation = Conversation::query()
+                ->where('type', 'user')
+                ->whereNull('ticket_id')
+                ->where(function ($q) use ($viewerId, $profileUserId) {
+                    $q->where(function ($sub) use ($viewerId, $profileUserId) {
+                        $sub->where('sender_id', $viewerId)
+                            ->where('receiver_id', $profileUserId);
+                    })->orWhere(function ($sub) use ($viewerId, $profileUserId) {
+                        $sub->where('sender_id', $profileUserId)
+                            ->where('receiver_id', $viewerId);
+                    });
+                })
+                ->first();
+
+            $existingConversationId = $conversation?->id;
+        }
+    }
+
+    return view('profile.show', [
+        'user' => $profileUser,
+        'isOwner' => $isOwner,
+        'friendshipState' => $friendshipState,
+        'existingConversationId' => $existingConversationId,
+        'profileCommentsVisibility' => $profileCommentsVisibility,
+        'sellerRatingAverage' => $sellerRatingAverage,
+        'sellerRatingCount' => $sellerRatingCount,
+        'visibleSellerFeedback' => $visibleSellerFeedback,
+        'canSubmitSellerFeedback' => $canSubmitSellerFeedback,
+        'canSubmitProfileComment' => $canSubmitProfileComment,
+        'canViewerSeeOwnedNfts' => $canViewerSeeOwnedNfts,
+    ]);
+})->name('profile.show');
+
+Route::post('/profile/{username}/feedback', [ProfileFeedbackController::class, 'store'])
+    ->middleware(['auth', 'not_banned'])
+    ->name('profile.feedback.store');
+
+Route::delete('/profile/{username}/feedback/{feedback}', [ProfileFeedbackController::class, 'destroy'])
+    ->middleware(['auth', 'not_banned'])
+    ->name('profile.feedback.destroy');
+
+Route::post('send-email', [ContactController::class, 'sendEmail'])->name('send.email');
+Route::livewire('/chat/ticket/{query}', 'pages::chat.ticket.index')
+    ->name('chat.ticket');
+Route::livewire('/chat/user/{user}/{conversation}', 'pages::chat.user.index')
+    ->name('chat.user');
+
+Route::post('/conversations/start/{listing}', [ConversationController::class, 'start'])
+    ->middleware(['auth', 'not_banned'])
+    ->name('conversations.start');
+
+Route::livewire('/chat/{query}', 'pages::chat.index')
+    ->name('chat');
+
+//ADMIN ROUTES 
+Route::middleware(['auth', 'admin'])->group(function () {
+
+    // Dashboard
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/approvals', [AdminController::class, 'approvals'])->name('admin.approvals.index');
+    Route::get('/admin/approvals/{collection}', [AdminController::class, 'reviewCollection'])->name('admin.approvals.show');
+    Route::post('/admin/collections/{collection}/approve', [AdminController::class, 'approveCollection'])->name('admin.collections.approve');
+    Route::post('/admin/collections/{collection}/reject', [AdminController::class, 'rejectCollection'])->name('admin.collections.reject');
+    Route::post('/admin/nfts/{nft}/approve', [AdminController::class, 'approveNft'])->name('admin.nfts.approve');
+    Route::post('/admin/nfts/{nft}/reject', [AdminController::class, 'rejectNft'])->name('admin.nfts.reject');
+
+    //tickets
+    Route::livewire('/admin/tickets', 'pages::tickets');
+    // Inventory
+    Route::get('/admin/inventory', [AdminController::class, 'inventory'])->name('admin.inventory');
+    Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
+    Route::get('/admin/refunds', [AdminController::class, 'refunds'])->name('admin.refunds');
+    Route::post('/admin/refunds/{item}/approve', [AdminController::class, 'approveRefund'])->name('admin.refunds.approve');
+    Route::post('/admin/refunds/{item}/deny', [AdminController::class, 'denyRefund'])->name('admin.refunds.deny');
+
+    // User Management
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::post('/admin/users/{id}/ban', [AdminController::class, 'banUser'])->name('admin.users.ban');
+    Route::post('/admin/users/{id}/unban', [AdminController::class, 'unbanUser'])->name('admin.users.unban');
+    Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+
+    //Show the edit form
+    Route::get('/admin/users/{id}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
+    
+    // Save the changes
+    Route::put('/admin/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+
+});
+
+// Reviews Management
+Route::get('/reviewUs', function () {
+    return view('reviewUs');
+});
+
+// Handle review submission
+Route::post('/nfts/{nft}/review', [NftReviewController::class, 'store'])
+    ->name('nfts.review.store')
+    ->middleware('auth');
+// Handle review update (if you want to allow users to edit their reviews)
+    Route::put('/nfts/{nft}/review', [NftReviewController::class, 'update'])
+    ->middleware('auth')
+    ->name('nfts.review.update');
+Route::delete('/nfts/{nft}/review/{review}', [NftReviewController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('nfts.review.destroy');
+
+
