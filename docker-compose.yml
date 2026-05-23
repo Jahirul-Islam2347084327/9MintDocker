@@ -1,0 +1,49 @@
+services:
+  9MintNginx:
+    image: nginx:alpine
+    container_name: 9MintApp_Nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./9Mint:/app 
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./certs:/etc/nginx/certs
+    depends_on:
+      - 9MintBackend
+  9MintDB:
+    image: mysql:8.4
+    ports:
+      - "3307:3306"
+    
+    
+    environment:
+      MYSQL_ROOT_PASSWORD: devpass_root_admin 
+      MYSQL_DATABASE: 9mint                    
+      MYSQL_USER: mint                         
+      MYSQL_PASSWORD: devpass                 
+      
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "mint", "-pdevpass"]
+      timeout: 5s
+      retries: 5
+  9MintBackend:
+    build:
+      context: ./9Mint 
+      dockerfile: Dockerfile
+    image: 9mintapp:latest
+    container_name: 9MintApp_Container
+    env_file:
+      - ./9Mint/.env 
+    volumes:
+      - ./9Mint:/app
+      - /app/vendor        
+      - /app/node_modules  
+    depends_on:
+      9MintDB:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
