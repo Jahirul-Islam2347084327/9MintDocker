@@ -20,10 +20,10 @@ RUN apt install -y libpng-dev libjpeg62-turbo-dev libwebp-dev libfreetype6-dev g
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 RUN docker-php-ext-install gd
 
-# 6. Install the PHP zip extension (Fixes the slow Composer download issue)
+# 6. Install the PHP zip extension
 RUN docker-php-ext-install zip
 
-# 7. Install the MySQL driver (Crucial so Laravel can talk to your database!)
+# 7. Install the MySQL driver
 RUN docker-php-ext-install pdo_mysql
     
 # 8. Install backend dependencies
@@ -32,7 +32,7 @@ RUN composer install
 # 9. Install frontend dependencies
 RUN npm install
 
-# 10. Compile frontend assets (Fixed syntax)
+# 10. Compile frontend assets
 RUN npm run build
 
 # Copy the entrypoint script into the container's system path
