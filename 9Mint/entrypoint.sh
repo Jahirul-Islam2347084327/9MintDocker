@@ -12,7 +12,7 @@ echo "Running backfill script..."
 chmod +x ./dev-tools/backfill.sh
 ./dev-tools/backfill.sh
 
-# 3. Hand over control to PHP-FPM (CRUCIAL!)
+# 3. Hand over control to PHP-FPM
 # This keeps the container alive and listening for Nginx requests
 echo "Starting PHP-FPM application server..."
 exec php-fpm
